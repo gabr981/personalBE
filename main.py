@@ -28,10 +28,10 @@ async def api_key_auth(api_key: str = Header(None)):
 
 @app.get("/api/items/", dependencies=[Depends(api_key_auth)])
 async def read_items():
-    items = await db.items.find().to_list(100)
-    return items
+    #items = await db.items.find().to_list(100)
+    return "items"
 
-@app.post("/api/items/", dependencies=[Depends(api_key_auth)])
+@app.post("/api/item/", dependencies=[Depends(api_key_auth)])
 async def create_item(item: Item):
     result = await db.items.insert_one(item.dict())
     return {"id": str(result.inserted_id)}
