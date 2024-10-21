@@ -3,7 +3,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
-
+import uvicorn
+import asyncio
 #load_dotenv()  # Carica variabili d'ambiente da un file .env
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
 API_KEY = os.getenv("API_KEY")
@@ -43,3 +44,7 @@ async def read_items():
 
 
 app.include_router(api)
+
+ # at last, the bottom of the file/module
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8000)
