@@ -1,5 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi import Header, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, APIRouter, Header
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel
 import os
@@ -7,8 +6,14 @@ from dotenv import load_dotenv
 
 load_dotenv()  # Carica variabili d'ambiente da un file .env
 MONGO_URL=os.getenv("MONGO_URL", "mongodb://localhost:27017")
+API_KEY = os.getenv("API_KEY")
 
 app = FastAPI()
+
+api = APIRouter(prefix="/api")
+
+
+
 
 # Connetti a MongoDB
 client = AsyncIOMotorClient(MONGO_URL)
@@ -22,16 +27,19 @@ class Item(BaseModel):
 # Middleware per l'API Key
 
 async def api_key_auth(api_key: str = Header(None)):
-    if api_key != os.getenv("API_KEY"):
+    if api_key != API_KEY:
         raise HTTPException(status_code=403, detail="API Key non valida")
     return True
 
-@app.get("/api/items/", dependencies=[Depends(api_key_auth)])
+@api.get("/items", dependencies=[Depends(api_key_auth)])
 async def read_items():
     #items = await db.items.find().to_list(100)
     return "items"
 
-@app.post("/api/item/", dependencies=[Depends(api_key_auth)])
+@api.post("/item", dependencies=[Depends(api_key_auth)])
 async def create_item(item: Item):
     result = await db.items.insert_one(item.dict())
     return {"id": str(result.inserted_id)}
+
+
+app.include_router(api)
